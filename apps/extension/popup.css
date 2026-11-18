@@ -1,0 +1,37 @@
+:root {
+  --bg: #f3f0ea; --surface: #fbfaf7; --sunken: #ece8e0; --border: #e3ded4; --border-strong: #cfc8bb;
+  --text: #24221e; --text-2: #6e695f; --text-3: #a29c90; --accent: #6f7f68; --danger: #a0675c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; width: 300px; padding: 16px; background: var(--bg); color: var(--text);
+  font: 13px/18px "Geist", system-ui, "Segoe UI", sans-serif;
+}
+header { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+.mark { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.word { font: italic 22px/26px "Instrument Serif", Georgia, serif; }
+.status {
+  display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.dot { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; transition: background 200ms ease; }
+.dot.ok { background: var(--accent); }
+.dot.bad { background: var(--danger); }
+.status-title { font-weight: 500; font-size: 14px; }
+.status-sub { color: var(--text-3); font: 11px/16px "Geist Mono", ui-monospace, monospace; word-break: break-all; }
+form { margin-top: 14px; }
+.eyebrow { display: block; margin-bottom: 6px; color: var(--text-3); font: 500 10px/14px "Geist Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+.row { display: flex; gap: 6px; }
+input {
+  flex: 1; min-width: 0; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface);
+  font: 13px "Geist Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text);
+}
+input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+button {
+  padding: 8px 14px; border-radius: 8px; border: 0; background: var(--text); color: var(--surface); font: 500 13px inherit; cursor: pointer;
+  transition: background 150ms ease;
+}
+button:hover { background: #3a3732; }
+.hint { margin: 6px 0 0; color: var(--text-3); font-size: 11px; line-height: 15px; }
+.open { display: block; margin-top: 14px; color: var(--text-2); text-decoration: none; }
+.open:hover { color: var(--text); }

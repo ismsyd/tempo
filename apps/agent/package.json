@@ -1,0 +1,21 @@
+{
+  "name": "@tempo/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.ts",
+    "dev": "node --watch-path=src --watch-path=../../packages/shared/src src/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/node-notifier": "^8.0.5"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.9",
+    "@tempo/shared": "^0.1.0",
+    "hono": "^4.13.19",
+    "koffi": "^3.3.8",
+    "node-notifier": "^12.1.0"
+  }
+}

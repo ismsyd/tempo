@@ -3,3 +3,5 @@ dist
 *.log
 *.sqlite
 .DS_Store
+.demo-data
+scripts/start-hidden.vbs

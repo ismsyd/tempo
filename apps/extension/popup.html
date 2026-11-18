@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tempo</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <span class="mark"></span><span class="word">tempo</span>
+    </header>
+
+    <section class="status" id="status">
+      <span class="dot" id="dot"></span>
+      <div>
+        <div class="status-title" id="status-title">Checking…</div>
+        <div class="status-sub" id="status-sub"></div>
+      </div>
+    </section>
+
+    <form id="pair">
+      <label for="code" class="eyebrow">Pairing code</label>
+      <div class="row">
+        <input id="code" autocomplete="off" spellcheck="false" placeholder="e.g. 9F3A1C2B" maxlength="16" />
+        <button type="submit">Save</button>
+      </div>
+      <p class="hint">Find it in Tempo → Settings → Tracking → Chrome extension.</p>
+    </form>
+
+    <a class="open" href="http://127.0.0.1:4747/" target="_blank">Open Tempo →</a>
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

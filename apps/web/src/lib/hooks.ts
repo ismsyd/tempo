@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { DEFAULT_SETTINGS, addDays, fromISODate, startOfWeek, toISODate, type Settings } from "@tempo/shared";
-import { getSettings, saveSettings } from "./api";
+import { getSettings, getStatus, saveSettings } from "./api";
+
+/** Polls the agent so the UI can show "not running" / "extension not connected". */
+export function useStatus() {
+  return useQuery({ queryKey: ["status"], queryFn: getStatus, refetchInterval: 10_000, retry: false });
+}
 
 export function useSettings() {
   const q = useQuery({ queryKey: ["settings"], queryFn: getSettings, staleTime: Infinity });

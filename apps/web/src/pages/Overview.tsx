@@ -16,6 +16,7 @@ import { useSettings, useWeekParam } from "../lib/hooks";
 import { fadeUp, EASE_OUT } from "../lib/motion";
 import { CountUp, Logo, Button, SearchField, Segmented, Select, SettingsButton, Skeleton, StatTile } from "../components/ui";
 import { UsageRow } from "../components/UsageRow";
+import { StatusBanner } from "../components/StatusBanner";
 import { WeekBars } from "../charts/Bars";
 
 const LIST_LIMIT = 10;
@@ -62,6 +63,7 @@ export function Overview() {
         </div>
         <SettingsButton />
       </motion.header>
+      <StatusBanner />
 
       <AnimatePresence mode="wait">
         <motion.div

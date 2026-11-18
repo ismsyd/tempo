@@ -82,3 +82,28 @@
   .week-switch-label { font-size: 12px; }
   .topbar-balance { display: none; }
 }
+
+/* ---------- Agent / extension status ---------- */
+.setting-control { gap: 12px; }
+.ext-pill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-full);
+  background: var(--bg-sunken); color: var(--text-secondary);
+}
+.ext-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); }
+.ext-pill.is-on { background: var(--accent-soft); color: var(--accent); }
+.ext-pill.is-on::before { background: var(--accent); }
+.pair-steps { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 8px; }
+.pair-code {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding: 14px 16px 14px 20px;
+  border-radius: var(--radius-md); background: var(--bg-sunken); letter-spacing: 0.12em;
+}
+.pair-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+
+.banner {
+  display: flex; align-items: center; gap: 12px; margin-top: 20px; padding: 12px 16px; border-radius: var(--radius-md);
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+}
+.banner-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--chart-clay); flex-shrink: 0; }
+.banner-text { flex: 1; }
+.banner a { color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--border-strong); }
+.banner a:hover { text-decoration-color: var(--text-primary); }

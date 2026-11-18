@@ -7,13 +7,25 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w @tempo/web",
+    "start": "node apps/agent/src/main.ts",
+    "dev": "concurrently -k -n agent,web -c gray,green \"npm:dev:agent\" \"npm:dev:web\"",
+    "dev:agent": "node --watch-path=apps/agent/src --watch-path=packages/shared/src apps/agent/src/main.ts --port 4748",
+    "dev:web": "npm run dev -w @tempo/web",
+    "dev:demo": "concurrently -k -n agent,web -c gray,green \"node apps/agent/src/main.ts --demo --port 4748\" \"npm:dev:web\"",
+    "demo": "npm run build && node apps/agent/src/main.ts --demo --port 4749",
     "build": "npm run build -w @tempo/web",
-    "typecheck": "tsc -p packages/shared && tsc -p apps/web --noEmit",
-    "test": "vitest run"
+    "typecheck": "tsc -p apps/web --noEmit && tsc -p apps/agent --noEmit",
+    "test": "vitest run",
+    "autostart:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 install",
+    "autostart:remove": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 remove",
+    "icons": "node scripts/make-icons.mjs"
   },
   "devDependencies": {
+    "concurrently": "^10.0.7",
     "typescript": "^7.0.2",
     "vitest": "^5.1.1"
+  },
+  "allowScripts": {
+    "koffi@3.3.8": true
   }
 }

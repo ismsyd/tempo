@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import type { Settings as SettingsT } from "@tempo/shared";
-import { deleteAllData, exportData, getItems, importData, updateItem } from "../lib/api";
-import { useSaveSettings, useSettings } from "../lib/hooks";
+import { deleteAllData, exportUrl, getItems, getPairing, importData, resetPairing, updateItem } from "../lib/api";
+import { useSaveSettings, useSettings, useStatus } from "../lib/hooks";
 import { EASE_OUT, fadeUp } from "../lib/motion";
 import { BackLink, Button, Dialog, Logo, MonoTile, SearchField, Select, Toast, Toggle, useToast } from "../components/ui";
 
@@ -30,6 +30,14 @@ export function Settings() {
 
   const set = (patch: Partial<SettingsT>) => save.mutate(patch, { onSuccess: () => showToast("Saved") });
 
+  // Deep links like /settings#tracking scroll to that section after the page fades in
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    const t = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 450);
+    return () => window.clearTimeout(t);
+  }, []);
+
   // Scroll-spy: highlight the section currently in view
   useEffect(() => {
     const els = SECTIONS.map((x) => document.getElementById(x.id)).filter(Boolean) as HTMLElement[];
@@ -44,16 +52,17 @@ export function Settings() {
     return () => io.disconnect();
   }, []);
 
-  const doExport = async (format: "json" | "csv") => {
-    const blob = await exportData(format);
-    const url = URL.createObjectURL(blob);
+  const status = useStatus();
+  const [pairOpen, setPairOpen] = useState(false);
+  const extConnected = !!status.data?.extension.connected;
+
+  const doExport = (format: "json" | "csv") => {
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `tempo-export-${new Date().toISOString().slice(0, 10)}.${format}`;
+    a.href = exportUrl(format);
+    a.download = "";
     a.click();
-    URL.revokeObjectURL(url);
     setExportOpen(false);
-    showToast(`Exported as ${format.toUpperCase()}`);
+    showToast(`Exporting as ${format.toUpperCase()}…`);
   };
 
   const doImport = async (file: File) => {
@@ -111,6 +120,19 @@ export function Settings() {
             </Row>
             <Row title="Track websites" desc="Record time on sites in Chrome (needs the Tempo extension).">
               <Toggle label="Track websites" checked={s.trackWebsites} onChange={(v) => set({ trackWebsites: v })} />
+            </Row>
+            <Row
+              title="Chrome extension"
+              desc={
+                status.isError
+                  ? "Tempo's tracker isn't running."
+                  : extConnected
+                    ? "Connected — websites are being recorded."
+                    : "Not connected. Pair the extension to see which websites you visit."
+              }
+            >
+              <span className={`ext-pill t-data-s ${extConnected ? "is-on" : ""}`}>{extConnected ? "Connected" : "Offline"}</span>
+              <Button onClick={() => setPairOpen(true)}>{extConnected ? "Pairing code" : "Connect"}</Button>
             </Row>
             <Row title="Idle timeout" desc="Stop counting after a stretch with no keyboard or mouse activity.">
               <Select
@@ -224,6 +246,8 @@ export function Settings() {
         </div>
       </div>
 
+      <PairingDialog open={pairOpen} onClose={() => setPairOpen(false)} connected={extConnected} onCopied={() => showToast("Code copied")} />
+
       <ExcludedDialog open={excludedOpen} onClose={() => setExcludedOpen(false)} onChanged={() => showToast("Saved")} />
 
       <Dialog open={exportOpen} onClose={() => setExportOpen(false)} title="Export data" width={400}>
@@ -307,6 +331,41 @@ function ExcludedDialog({ open, onClose, onChanged }: { open: boolean; onClose: 
         ))}
         {list.length === 0 && <li className="t-body-s c-tertiary" style={{ padding: 12 }}>Nothing found.</li>}
       </ul>
+    </Dialog>
+  );
+}
+
+function PairingDialog({ open, onClose, connected, onCopied }: { open: boolean; onClose: () => void; connected: boolean; onCopied: () => void }) {
+  const qc = useQueryClient();
+  const code = useQuery({ queryKey: ["pairing"], queryFn: getPairing, enabled: open });
+  const reset = useMutation({ mutationFn: resetPairing, onSuccess: (d) => qc.setQueryData(["pairing"], d) });
+  return (
+    <Dialog open={open} onClose={onClose} title="Connect Chrome" width={500}>
+      <ol className="pair-steps t-body-s c-secondary">
+        <li>
+          Open <span className="t-data-s c-primary">chrome://extensions</span> and switch on <strong>Developer mode</strong> (top right).
+        </li>
+        <li>
+          Click <strong>Load unpacked</strong> and choose the folder <span className="t-data-s c-primary">tempo\apps\extension</span>.
+        </li>
+        <li>Click the Tempo icon in Chrome’s toolbar and enter this code:</li>
+      </ol>
+      <div className="pair-code">
+        <span className="t-data-l">{code.data?.code ?? "········"}</span>
+        <Button
+          onClick={() => {
+            if (code.data) navigator.clipboard?.writeText(code.data.code).then(onCopied, () => {});
+          }}
+        >
+          Copy
+        </Button>
+      </div>
+      <div className="pair-foot">
+        <span className={`ext-pill t-data-s ${connected ? "is-on" : ""}`}>{connected ? "Connected" : "Waiting for the extension…"}</span>
+        <Button kind="ghost" onClick={() => reset.mutate()}>
+          <span className="t-body-s">New code</span>
+        </Button>
+      </div>
     </Dialog>
   );
 }

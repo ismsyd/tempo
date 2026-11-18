@@ -42,7 +42,7 @@ export class Store {
     this.db = new DatabaseSync(this.path);
     this.db.exec(`
       PRAGMA journal_mode = WAL;
-      PRAGMA synchronous = NORMAL;
+      PRAGMA synchronous = FULL; -- every save is forced to disk, so a power cut can't undo it
       CREATE TABLE IF NOT EXISTS items (
         id TEXT PRIMARY KEY,
         kind TEXT NOT NULL,
@@ -151,6 +151,13 @@ export class Store {
   }
   deleteEverything() {
     this.db.exec("DELETE FROM spans; DELETE FROM items; DELETE FROM kv WHERE key LIKE 'notified:%' OR key LIKE 'weekly:%';");
+  }
+  checkpoint() {
+    try {
+      this.db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
+    } catch (e) {
+      console.error("[db] checkpoint failed", e);
+    }
   }
   transaction(fn: () => void) {
     this.db.exec("BEGIN");

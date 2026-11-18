@@ -23,7 +23,7 @@ export function StatusBanner() {
     key = "ext";
     content = (
       <span className="t-body-s c-secondary banner-text">
-        Websites aren’t being recorded yet. <Link to="/settings#tracking">Connect the Chrome extension</Link> to see them here.
+        Websites aren’t being recorded yet. <Link to="/settings#tracking">Connect the browser extension</Link> to see them here.
       </span>
     );
   }

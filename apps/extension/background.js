@@ -6,6 +6,15 @@ const HEARTBEAT_MINUTES = 0.5; // Chrome's minimum alarm period (30 s)
 
 let pending = null;
 
+// The same extension runs in Chrome and Brave; Tempo needs to know which, to match it to brave.exe / chrome.exe.
+function detectBrowser() {
+  if (navigator.brave) return "brave";
+  const brands = navigator.userAgentData?.brands ?? [];
+  if (brands.some((b) => /brave/i.test(b.brand))) return "brave";
+  return "chrome";
+}
+const BROWSER = detectBrowser();
+
 async function activeTab() {
   const win = await chrome.windows.getLastFocused({ windowTypes: ["normal", "popup", "app"] }).catch(() => null);
   if (!win || !win.focused) return null;
@@ -24,6 +33,7 @@ async function report() {
     url: tab?.url ?? null,
     audible: !!tab?.audible,
     incognito: !!tab?.incognito,
+    browser: BROWSER,
   };
   try {
     const res = await fetch(ENDPOINT, {

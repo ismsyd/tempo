@@ -55,6 +55,9 @@ export function Settings() {
   const status = useStatus();
   const [pairOpen, setPairOpen] = useState(false);
   const extConnected = !!status.data?.extension.connected;
+  const connectedNames = (status.data?.extension.browsers ?? [])
+    .map((b) => (b === "brave" ? "Brave" : "Chrome"))
+    .join(" and ");
 
   const doExport = (format: "json" | "csv") => {
     const a = document.createElement("a");
@@ -118,17 +121,17 @@ export function Settings() {
             <Row title="Track apps" desc="Measure time spent in desktop applications.">
               <Toggle label="Track apps" checked={s.trackApps} onChange={(v) => set({ trackApps: v })} />
             </Row>
-            <Row title="Track websites" desc="Record time on sites in Chrome (needs the Tempo extension).">
+            <Row title="Track websites" desc="Record time on sites in Chrome or Brave (needs the Tempo extension).">
               <Toggle label="Track websites" checked={s.trackWebsites} onChange={(v) => set({ trackWebsites: v })} />
             </Row>
             <Row
-              title="Chrome extension"
+              title="Browser extension"
               desc={
                 status.isError
                   ? "Tempo's tracker isn't running."
                   : extConnected
-                    ? "Connected — websites are being recorded."
-                    : "Not connected. Pair the extension to see which websites you visit."
+                    ? `Connected in ${connectedNames} — websites are being recorded.`
+                    : "Not connected. Pair the extension in Chrome or Brave to see which websites you visit."
               }
             >
               <span className={`ext-pill t-data-s ${extConnected ? "is-on" : ""}`}>{extConnected ? "Connected" : "Offline"}</span>
@@ -340,15 +343,16 @@ function PairingDialog({ open, onClose, connected, onCopied }: { open: boolean; 
   const code = useQuery({ queryKey: ["pairing"], queryFn: getPairing, enabled: open });
   const reset = useMutation({ mutationFn: resetPairing, onSuccess: (d) => qc.setQueryData(["pairing"], d) });
   return (
-    <Dialog open={open} onClose={onClose} title="Connect Chrome" width={500}>
+    <Dialog open={open} onClose={onClose} title="Connect your browser" width={520}>
       <ol className="pair-steps t-body-s c-secondary">
         <li>
-          Open <span className="t-data-s c-primary">chrome://extensions</span> and switch on <strong>Developer mode</strong> (top right).
+          Open <span className="t-data-s c-primary">brave://extensions</span> in Brave or <span className="t-data-s c-primary">chrome://extensions</span> in
+          Chrome, and switch on <strong>Developer mode</strong>.
         </li>
         <li>
           Click <strong>Load unpacked</strong> and choose the folder <span className="t-data-s c-primary">tempo\apps\extension</span>.
         </li>
-        <li>Click the Tempo icon in Chrome’s toolbar and enter this code:</li>
+        <li>Click the Tempo icon in the toolbar (pin it from the puzzle-piece menu) and enter this code:</li>
       </ol>
       <div className="pair-code">
         <span className="t-data-l">{code.data?.code ?? "········"}</span>

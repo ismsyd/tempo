@@ -40,7 +40,7 @@ export interface Status {
   ok: boolean;
   version: string;
   tracking: { apps: boolean; websites: boolean };
-  extension: { connected: boolean; lastSeen: number | null };
+  extension: { connected: boolean; browsers: string[]; lastSeen: number | null };
   current: { itemId: string; name: string } | null;
 }
 

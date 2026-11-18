@@ -10,13 +10,14 @@ import { getForeground, getIdleSeconds } from "./win32.ts";
 import { fallbackName, fileDescription } from "./names.ts";
 
 const TICK_MS = 1000;
-const FLUSH_MS = 15_000; // crash safety: open span written at least this often
+const FLUSH_MS = 10_000; // crash safety: open span written at least this often
 const CONTINUE_GAP_MS = 3_000; // same item within this gap extends the span
 const SLEEP_GAP_MS = 15_000; // a longer gap between ticks means the PC slept
 const EXT_FRESH_MS = 75_000; // extension reports older than this are ignored
 const MIN_SPAN_MS = 1_000;
 
-const BROWSERS = new Set(["chrome.exe"]);
+/** Browsers the Tempo extension can run in: exe name -> browser id sent by the extension. */
+export const BROWSERS: Record<string, string> = { "chrome.exe": "chrome", "brave.exe": "brave" };
 const IGNORED = new Set(["lockapp.exe", "searchhost.exe", "shellexperiencehost.exe", "startmenuexperiencehost.exe", "screenclippinghost.exe"]);
 
 export interface ExtensionState {
@@ -36,7 +37,8 @@ interface OpenSpan {
 
 export class Tracker {
   store: Store;
-  ext: ExtensionState | null = null;
+  /** Latest report from the extension, per browser ("chrome", "brave") */
+  ext = new Map<string, ExtensionState>();
   current: { itemId: string; name: string } | null = null;
   private open: OpenSpan | null = null;
   private lastTick = 0;
@@ -70,8 +72,12 @@ export class Tracker {
     }
   }
 
+  /** Browsers whose extension reported recently. */
+  connectedBrowsers(now = Date.now()): string[] {
+    return [...this.ext.entries()].filter(([, s]) => now - s.at < EXT_FRESH_MS).map(([b]) => b);
+  }
   extensionConnected(now = Date.now()): boolean {
-    return !!this.ext && now - this.ext.at < EXT_FRESH_MS;
+    return this.connectedBrowsers(now).length > 0;
   }
 
   tick(now: number) {
@@ -82,9 +88,11 @@ export class Tracker {
     const s = this.store.getSettings();
     const fg = getForeground();
     const exe = fg?.exePath ? basename(fg.exePath).toLowerCase() : null;
-    const extFresh = this.extensionConnected(now);
-    const isBrowser = !!exe && BROWSERS.has(exe);
-    const mediaPlaying = isBrowser && extFresh && !!this.ext?.audible;
+    const browser = exe ? BROWSERS[exe] : undefined;
+    const ext = browser ? this.ext.get(browser) : undefined;
+    const extFresh = !!ext && now - ext.at < EXT_FRESH_MS;
+    const isBrowser = !!browser;
+    const mediaPlaying = isBrowser && extFresh && !!ext?.audible;
 
     const idle = getIdleSeconds();
     if (idle >= s.idleTimeoutMinutes * 60 && !mediaPlaying) {
@@ -94,8 +102,8 @@ export class Tracker {
 
     let item: Item | null = null;
     if (isBrowser && s.trackWebsites && extFresh) {
-      if (this.ext!.incognito && s.ignorePrivateWindows) return this.close(now);
-      if (this.ext!.domain) item = this.ensureWeb(this.ext!.domain, now);
+      if (ext!.incognito && s.ignorePrivateWindows) return this.close(now);
+      if (ext!.domain) item = this.ensureWeb(ext!.domain, now);
       else if (s.trackApps) item = this.ensureApp(fg.exePath, fg.title, now);
     } else if (s.trackApps) {
       item = this.ensureApp(fg.exePath, fg.title, now);

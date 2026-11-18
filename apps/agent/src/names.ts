@@ -7,6 +7,7 @@ const OVERRIDES: Record<string, string> = {
   "explorer.exe": "File Explorer",
   "windowsterminal.exe": "Terminal",
   "chrome.exe": "Google Chrome",
+  "brave.exe": "Brave",
   "msedge.exe": "Microsoft Edge",
   "winword.exe": "Word",
   "powerpnt.exe": "PowerPoint",

@@ -96,7 +96,11 @@ export function createApi(store: Store, tracker: Tracker) {
       ok: true,
       version: VERSION,
       tracking: { apps: s.trackApps, websites: s.trackWebsites },
-      extension: { connected: tracker.extensionConnected(), lastSeen: tracker.ext?.at ?? null },
+      extension: {
+        connected: tracker.extensionConnected(),
+        browsers: tracker.connectedBrowsers(),
+        lastSeen: Math.max(0, ...[...tracker.ext.values()].map((e) => e.at)) || null,
+      },
       current: tracker.current,
     });
   });
@@ -201,8 +205,9 @@ export function createApi(store: Store, tracker: Tracker) {
 
   // --- Extension ---
   app.post("/api/ext/heartbeat", async (c) => {
-    const b = (await c.req.json().catch(() => ({}))) as { url?: string; audible?: boolean; incognito?: boolean };
-    tracker.ext = { domain: domainOf(b.url), audible: !!b.audible, incognito: !!b.incognito, at: Date.now() };
+    const b = (await c.req.json().catch(() => ({}))) as { url?: string; audible?: boolean; incognito?: boolean; browser?: string };
+    const browser = b.browser === "brave" ? "brave" : "chrome"; // older extension versions didn't send this
+    tracker.ext.set(browser, { domain: domainOf(b.url), audible: !!b.audible, incognito: !!b.incognito, at: Date.now() });
     return c.json({ ok: true });
   });
 

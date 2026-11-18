@@ -40,6 +40,7 @@ const APP_RULES: Record<string, string> = {
   "steam.exe": "Games",
   "explorer.exe": "Utilities",
   "chrome.exe": "Browsing",
+  "brave.exe": "Browsing",
   "msedge.exe": "Browsing",
   "firefox.exe": "Browsing",
   "claude.exe": "Productivity",

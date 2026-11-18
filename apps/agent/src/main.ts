@@ -8,6 +8,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { homedir } from "node:os";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { generateDemoData } from "@tempo/shared";
@@ -27,9 +28,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../..");
 const demo = flag("demo");
 const port = Number(opt("port") ?? process.env.TEMPO_PORT ?? 4747);
-const dataDir = demo
-  ? join(repo, ".demo-data")
-  : (process.env.TEMPO_DATA_DIR ?? join(process.env.LOCALAPPDATA ?? join(process.env.HOME ?? ".", ".local", "share"), "Tempo"));
+// Data lives in %USERPROFILE%\.tempo. (Not AppData: Windows silently redirects AppData writes
+// for programs launched from packaged apps, which made the same PC see two different databases.)
+const dataDir = demo ? join(repo, ".demo-data") : (process.env.TEMPO_DATA_DIR ?? join(homedir(), ".tempo"));
 
 const store = new Store(dataDir);
 if (demo && store.items().length === 0) {
@@ -69,8 +70,12 @@ server.on("error", (e: NodeJS.ErrnoException) => {
   process.exit(1);
 });
 
+// Fold the write-ahead log into the main file regularly, so the main file is always current
+setInterval(() => store.checkpoint(), 10 * 60_000);
+
 const shutdown = () => {
   tracker.stop();
+  store.checkpoint();
   process.exit(0);
 };
 process.on("SIGINT", shutdown);

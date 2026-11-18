@@ -1,0 +1,76 @@
+/* Design tokens — mirrored from the Figma variables "Tempo / Color" and "Tempo / Size" */
+:root {
+  /* color */
+  --bg-canvas: #f3f0ea;
+  --bg-surface: #fbfaf7;
+  --bg-sunken: #ece8e0;
+  --border-subtle: #e3ded4;
+  --border-strong: #cfc8bb;
+  --text-primary: #24221e;
+  --text-secondary: #6e695f;
+  --text-tertiary: #a29c90;
+  --accent: #6f7f68;
+  --accent-soft: #e1e5da;
+  --chart-sage: #8a9a82;
+  --chart-clay: #bc9c86;
+  --chart-slate: #8d98a4;
+  --chart-sand: #d3c5aa;
+  --chart-mauve: #a8959e;
+  --chart-track: #e7e2d9;
+  --danger: #a0675c;
+
+  /* spacing */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+
+  /* radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 999px;
+
+  /* elevation */
+  --shadow-soft: 0 1px 2px rgba(51, 43, 31, 0.05), 0 8px 24px -6px rgba(51, 43, 31, 0.06);
+  --shadow-pop: 0 2px 6px rgba(51, 43, 31, 0.06), 0 24px 48px -12px rgba(51, 43, 31, 0.16);
+
+  /* type families */
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 180ms;
+  --dur-base: 260ms;
+
+  /* layout */
+  --content: 1040px;
+}
+
+/* Text styles (Figma: Display/*, Heading/*, Body/*, Label/*, Data/*) */
+.t-display-xl { font: 400 60px/64px var(--font-display); letter-spacing: -0.01em; }
+.t-display-l  { font: 400 44px/48px var(--font-display); letter-spacing: -0.005em; }
+.t-display-m  { font: 400 28px/34px var(--font-display); }
+.t-heading-m  { font: 500 17px/24px var(--font-sans); letter-spacing: -0.005em; }
+.t-heading-s  { font: 500 15px/20px var(--font-sans); letter-spacing: -0.003em; }
+.t-body-m     { font: 400 15px/24px var(--font-sans); }
+.t-body-s     { font: 400 13px/18px var(--font-sans); }
+.t-eyebrow    { font: 500 11px/16px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.t-data-l     { font: 400 30px/36px var(--font-mono); letter-spacing: -0.02em; }
+.t-data-m     { font: 400 14px/20px var(--font-mono); }
+.t-data-s     { font: 400 12px/16px var(--font-mono); }
+
+.c-primary { color: var(--text-primary); }
+.c-secondary { color: var(--text-secondary); }
+.c-tertiary { color: var(--text-tertiary); }
+.c-accent { color: var(--accent); }
+
+@media (max-width: 720px) {
+  .t-display-xl { font-size: 44px; line-height: 48px; }
+  .t-display-l { font-size: 36px; line-height: 40px; }
+}

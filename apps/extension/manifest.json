@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Tempo",
   "short_name": "Tempo",
-  "version": "0.2.0",
-  "description": "Tells the Tempo app on this computer which website you are on (Chrome or Brave). Sends nothing anywhere else.",
+  "version": "0.3.0",
+  "description": "Tells the Tempo app on this computer which website you are on. Works in Chrome, Brave, Edge, Opera, Opera GX, Vivaldi and other Chromium browsers. Sends nothing anywhere else.",
   "permissions": [
     "tabs",
     "storage",

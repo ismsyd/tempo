@@ -1,12 +1,12 @@
 # Tempo
 
-A private, local screen-time tracker for Windows. It records which apps you use and (with the browser extension, for Chrome or Brave) which websites you visit, and shows it in a calm web app at **http://127.0.0.1:4747**.
+A private, local screen-time tracker for Windows. It records which apps you use and (with the browser extension, for Chromium-based browsers) which websites you visit, and shows it in a calm web app at **http://127.0.0.1:4747**.
 
 Everything stays on this computer: no accounts, no cloud, no sync.
 
 ## First-time setup
 
-You need Node.js 22.18 or newer (this PC has Node 26), and Brave or Google Chrome for website tracking.
+You need Node.js 22.18 or newer (this PC has Node 26), and a Chromium-based browser (Chrome, Brave, Edge, Opera, Opera GX, Vivaldi…) for website tracking.
 
 ```bash
 npm install
@@ -18,9 +18,17 @@ Open http://127.0.0.1:4747. Leave the terminal open while you want tracking. To 
 
 ### Connect your browser (to see websites)
 
-Works in **Brave** and **Chrome** (you can use both at once).
+Works in **Chrome, Brave, Edge, Opera, Opera GX, Vivaldi, Chromium and Arc**. You can use several at once; do these steps in each one.
 
-1. Open `brave://extensions` (Brave) or `chrome://extensions` (Chrome) and switch on **Developer mode**.
+| Browser | Extensions page |
+|---|---|
+| Chrome / Chromium | `chrome://extensions` |
+| Brave | `brave://extensions` |
+| Edge | `edge://extensions` |
+| Opera / Opera GX | `opera://extensions` |
+| Vivaldi | `vivaldi://extensions` |
+
+1. Open the extensions page and switch on **Developer mode**.
 2. Click **Load unpacked** and choose the folder `apps\extension`.
 3. In Tempo, open **Settings → Tracking → Browser extension → Connect** and copy the code.
 4. Click the Tempo icon in the toolbar (pin it from the puzzle-piece menu), paste the code and press **Save**. The status turns to *Connected*.
@@ -37,6 +45,13 @@ This builds the app and registers a **Task Scheduler** task named *Tempo* that s
 npm run autostart:remove
 ```
 
+Start or stop it by hand (it starts again at your next login):
+
+```bash
+npm run autostart:start
+npm run autostart:stop
+```
+
 ## Where your data lives
 
 `C:\Users\<you>\.tempo\tempo.sqlite`, a single SQLite file. Every save is forced to disk (`synchronous=FULL`) and the current session is saved every 10 seconds, so a power cut or empty battery loses at most about 10 seconds. Settings → Privacy & data lets you export it (CSV or JSON), import a JSON export, set how long history is kept, or delete everything.
@@ -47,7 +62,7 @@ npm run autostart:remove
 
 - The foreground window is checked every second. Consecutive seconds on the same app or site become one span.
 - After the **idle timeout** (default 5 min) with no keyboard or mouse input, counting stops. Exception: a browser tab playing audio or video keeps counting.
-- When Brave or Chrome is in front and its extension is connected, time goes to the **website**, not to the browser, so nothing is counted twice. The browser's own pages (new tab, settings) count as the browser.
+- When a browser with the extension is in front, time goes to the **website**, not to the browser, so nothing is counted twice. The browser's own pages (new tab, settings) count as the browser.
 - Private/incognito windows aren't visible to the extension, so that time is recorded as the browser, without any site names.
 - The lock screen, sleep and hibernate stop counting.
 - Only domains are stored (e.g. `github.com`), never full URLs or page titles.
@@ -68,11 +83,12 @@ Project layout:
 |---|---|
 | `apps/agent` | Tracker (Windows APIs via koffi), SQLite storage, local API, reminders |
 | `apps/web` | The React web app (design from Figma) |
-| `apps/extension` | Browser extension for Brave and Chrome (Manifest V3) |
+| `apps/extension` | Browser extension for Chromium-based browsers (Manifest V3) |
 | `packages/shared` | Types, time math and aggregation shared by all parts |
 
 ## Known limitations
 
-- Windows only (app tracking); Brave and Chrome only (websites).
+- Windows only (app tracking). Websites: Chromium-based browsers only. Firefox isn't supported yet, and Safari doesn't exist on Windows.
+- Vivaldi and Arc don't identify themselves, so they're matched by which browser window is focused. This works fine unless two such browsers are open side by side.
 - Programs running as administrator may show as "Unknown app (admin)".
 - Microsoft Store apps (Settings, Calculator…) are named from their window title.

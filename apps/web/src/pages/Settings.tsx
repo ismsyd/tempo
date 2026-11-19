@@ -14,6 +14,17 @@ const SECTIONS = [
   { id: "privacy", label: "Privacy & data" },
 ] as const;
 
+const BROWSER_LABELS: Record<string, string> = {
+  chrome: "Chrome",
+  brave: "Brave",
+  edge: "Edge",
+  opera: "Opera",
+  "opera-gx": "Opera GX",
+  vivaldi: "Vivaldi",
+  chromium: "Chromium",
+  arc: "Arc",
+};
+
 const HOURS = (n: number) => `${n} hour${n === 1 ? "" : "s"}`;
 const DAYS = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
 
@@ -56,7 +67,7 @@ export function Settings() {
   const [pairOpen, setPairOpen] = useState(false);
   const extConnected = !!status.data?.extension.connected;
   const connectedNames = (status.data?.extension.browsers ?? [])
-    .map((b) => (b === "brave" ? "Brave" : "Chrome"))
+    .map((b) => BROWSER_LABELS[b] ?? "your browser")
     .join(" and ");
 
   const doExport = (format: "json" | "csv") => {
@@ -121,7 +132,7 @@ export function Settings() {
             <Row title="Track apps" desc="Measure time spent in desktop applications.">
               <Toggle label="Track apps" checked={s.trackApps} onChange={(v) => set({ trackApps: v })} />
             </Row>
-            <Row title="Track websites" desc="Record time on sites in Chrome or Brave (needs the Tempo extension).">
+            <Row title="Track websites" desc="Record time on sites in Chrome, Brave, Edge, Opera and other Chromium browsers (needs the Tempo extension).">
               <Toggle label="Track websites" checked={s.trackWebsites} onChange={(v) => set({ trackWebsites: v })} />
             </Row>
             <Row
@@ -131,7 +142,7 @@ export function Settings() {
                   ? "Tempo's tracker isn't running."
                   : extConnected
                     ? `Connected in ${connectedNames} — websites are being recorded.`
-                    : "Not connected. Pair the extension in Chrome or Brave to see which websites you visit."
+                    : "Not connected. Pair the extension in your browser to see which websites you visit."
               }
             >
               <span className={`ext-pill t-data-s ${extConnected ? "is-on" : ""}`}>{extConnected ? "Connected" : "Offline"}</span>
@@ -346,8 +357,10 @@ function PairingDialog({ open, onClose, connected, onCopied }: { open: boolean; 
     <Dialog open={open} onClose={onClose} title="Connect your browser" width={520}>
       <ol className="pair-steps t-body-s c-secondary">
         <li>
-          Open <span className="t-data-s c-primary">brave://extensions</span> in Brave or <span className="t-data-s c-primary">chrome://extensions</span> in
-          Chrome, and switch on <strong>Developer mode</strong>.
+          Open your browser’s extensions page and switch on <strong>Developer mode</strong>:{" "}
+          <span className="t-data-s c-primary">brave://extensions</span>, <span className="t-data-s c-primary">chrome://extensions</span>,{" "}
+          <span className="t-data-s c-primary">edge://extensions</span>, <span className="t-data-s c-primary">opera://extensions</span> or{" "}
+          <span className="t-data-s c-primary">vivaldi://extensions</span>. Repeat these steps in each browser you use.
         </li>
         <li>
           Click <strong>Load unpacked</strong> and choose the folder <span className="t-data-s c-primary">tempo\apps\extension</span>.

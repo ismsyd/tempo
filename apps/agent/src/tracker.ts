@@ -8,24 +8,16 @@ import type { Item } from "@tempo/shared";
 import type { Store } from "./db.ts";
 import { getForeground, getIdleSeconds } from "./win32.ts";
 import { fallbackName, fileDescription } from "./names.ts";
+import { BROWSER_NAMES, EXT_FRESH_MS, browserItemKey, browserOf, pickReport } from "./browsers.ts";
+import type { ExtensionState } from "./browsers.ts";
 
 const TICK_MS = 1000;
 const FLUSH_MS = 10_000; // crash safety: open span written at least this often
 const CONTINUE_GAP_MS = 3_000; // same item within this gap extends the span
 const SLEEP_GAP_MS = 15_000; // a longer gap between ticks means the PC slept
-const EXT_FRESH_MS = 75_000; // extension reports older than this are ignored
 const MIN_SPAN_MS = 1_000;
 
-/** Browsers the Tempo extension can run in: exe name -> browser id sent by the extension. */
-export const BROWSERS: Record<string, string> = { "chrome.exe": "chrome", "brave.exe": "brave" };
 const IGNORED = new Set(["lockapp.exe", "searchhost.exe", "shellexperiencehost.exe", "startmenuexperiencehost.exe", "screenclippinghost.exe"]);
-
-export interface ExtensionState {
-  domain: string | null;
-  audible: boolean;
-  incognito: boolean;
-  at: number;
-}
 
 interface OpenSpan {
   id: number;
@@ -37,7 +29,7 @@ interface OpenSpan {
 
 export class Tracker {
   store: Store;
-  /** Latest report from the extension, per browser ("chrome", "brave") */
+  /** Latest report from the extension, per browser id ("chrome", "brave", "edge", …) */
   ext = new Map<string, ExtensionState>();
   current: { itemId: string; name: string } | null = null;
   private open: OpenSpan | null = null;
@@ -88,9 +80,9 @@ export class Tracker {
     const s = this.store.getSettings();
     const fg = getForeground();
     const exe = fg?.exePath ? basename(fg.exePath).toLowerCase() : null;
-    const browser = exe ? BROWSERS[exe] : undefined;
-    const ext = browser ? this.ext.get(browser) : undefined;
-    const extFresh = !!ext && now - ext.at < EXT_FRESH_MS;
+    const browser = browserOf(fg?.exePath ?? null);
+    const ext = browser ? pickReport(browser, this.ext, now) : null;
+    const extFresh = !!ext;
     const isBrowser = !!browser;
     const mediaPlaying = isBrowser && extFresh && !!ext?.audible;
 
@@ -157,8 +149,10 @@ export class Tracker {
       key = `uwp:${t.toLowerCase()}`;
       name = t;
     } else {
-      key = basename(exePath).toLowerCase();
-      name = fallbackName(exePath);
+      const b = browserOf(exePath);
+      const special = b ? browserItemKey(b) : null; // Opera GX / Chromium share an exe name with another browser
+      key = special ?? basename(exePath).toLowerCase();
+      name = special ? BROWSER_NAMES[b!] : fallbackName(exePath);
     }
     const found = this.store.itemByKey(key);
     if (found) return found;
@@ -169,7 +163,7 @@ export class Tracker {
     };
     this.store.insertItem(item);
     // Look up the nicer name in the background
-    if (exePath && !key.startsWith("uwp:") && !this.naming.has(key)) {
+    if (exePath && !key.startsWith("uwp:") && key === basename(exePath).toLowerCase() && !this.naming.has(key)) {
       this.naming.add(key);
       fileDescription(exePath).then((n) => n && n !== name && this.store.updateItem(id, { name: n }));
     }

@@ -14,6 +14,7 @@ import {
 import type { Item, Settings, Span, WeekFilter, WeekSort } from "@tempo/shared";
 import type { Store } from "./db.ts";
 import type { Tracker } from "./tracker.ts";
+import { BROWSER_NAMES } from "./browsers.ts";
 
 const VERSION = "0.1.0";
 
@@ -205,9 +206,16 @@ export function createApi(store: Store, tracker: Tracker) {
 
   // --- Extension ---
   app.post("/api/ext/heartbeat", async (c) => {
-    const b = (await c.req.json().catch(() => ({}))) as { url?: string; audible?: boolean; incognito?: boolean; browser?: string };
-    const browser = b.browser === "brave" ? "brave" : "chrome"; // older extension versions didn't send this
-    tracker.ext.set(browser, { domain: domainOf(b.url), audible: !!b.audible, incognito: !!b.incognito, at: Date.now() });
+    const b = (await c.req.json().catch(() => ({}))) as { url?: string; audible?: boolean; incognito?: boolean; browser?: string; focused?: boolean };
+    // Older extension versions sent no browser id (they only ran in Chrome) and no focus flag
+    const browser = typeof b.browser === "string" && Object.hasOwn(BROWSER_NAMES, b.browser) ? b.browser : "chrome";
+    tracker.ext.set(browser, {
+      domain: domainOf(b.url),
+      audible: !!b.audible,
+      incognito: !!b.incognito,
+      focused: typeof b.focused === "boolean" ? b.focused : !!b.url,
+      at: Date.now(),
+    });
     return c.json({ ok: true });
   });
 

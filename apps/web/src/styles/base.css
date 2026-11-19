@@ -16,7 +16,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: "ss01", "cv11";
+
+  /* App-like feel: clicking text or charts never shows a typing caret, selects text,
+     or turns the pointer into a text cursor. Text fields opt back in below. */
+  cursor: default;
+  caret-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
+
+input,
+textarea,
+[contenteditable="true"] {
+  cursor: text;
+  caret-color: var(--text-primary);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+a,
+button,
+select,
+[role="switch"],
+[role="tab"] {
+  cursor: pointer;
+}
+
+svg text { pointer-events: none; }
 
 h1, h2, h3, p { margin: 0; font-weight: inherit; }
 a { color: inherit; text-decoration: none; }
